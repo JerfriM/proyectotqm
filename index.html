@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Para ti</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.0/vanilla-tilt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@300;900&display=swap" rel="stylesheet">
+    <style>
+        body { background: #000; overflow: hidden; color: white; font-family: 'Inter', sans-serif; touch-action: none; }
+        .carousel-item { position: absolute; pointer-events: none; will-change: transform; white-space: nowrap; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 50px rgba(0,0,0,1);
+        }
+        .special-font { font-family: 'Dancing Script', cursive; }
+        #tqm-center { 
+            position: absolute; font-size: 5rem; font-weight: 900; font-family: 'Dancing Script', cursive;
+            filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.6));
+            z-index: 10;
+        }
+        #flash { position: absolute; inset: 0; background: white; opacity: 0; z-index: 200; pointer-events: none; }
+        
+        /* ESTILO PARA EL CANVAS DE ESTRELLAS */
+        #stars-canvas { 
+            position: absolute; 
+            inset: 0; 
+            display: none; /* Empieza oculto */
+            pointer-events: none; 
+            z-index: 0; 
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen">
+
+    <audio id="musica-fondo" loop>
+        <source src="ti.mp3" type="audio/mpeg">
+    </audio>
+
+    <canvas id="stars-canvas"></canvas>
+
+    <div id="flash"></div>
+
+    <div id="fase1" class="text-center z-50">
+        <h1 class="text-4xl font-light opacity-0 mb-4" id="hola">Hola...</h1>
+        <p class="text-lg text-gray-400 mb-8 opacity-0" id="intro-p">Tengo algo para ti.</p>
+        <button id="btn-start" class="opacity-0 px-10 py-2 border border-white/40 rounded-full hover:bg-white hover:text-black transition-all">ENTRAR</button>
+    </div>
+
+    <div id="fase2" class="absolute inset-0 hidden flex items-center justify-center overflow-hidden">
+        <div id="tqm-center" class="opacity-0 special-font text-cyan-400">Isary</div>
+        <div id="orbit-wrapper" class="relative w-full h-full flex items-center justify-center"></div>
+        <button id="btn-continue" class="absolute bottom-20 hidden px-12 py-3 bg-white text-black rounded-full font-bold tracking-widest z-50">CONTINUAR</button>
+    </div>
+
+    <div id="fase3" class="hidden flex-col items-center justify-center z-50 w-full h-full">
+        <div class="glass-card p-4 rounded-[40px] w-[90%] max-w-[360px] aspect-[3/4] flex flex-col items-center justify-between" data-tilt>
+            <div class="w-full text-center mt-4">
+                <p class="text-[10px] tracking-[0.5em] text-white/40 uppercase">Comprobante Oficial</p>
+            </div>
+            
+            <div class="flex-grow w-full flex items-center justify-center overflow-hidden my-4 px-2">
+                <img src="tu.jpg" alt="Comprobante" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl">
+            </div>
+
+            <div class="text-center mb-6">
+                <h2 class="text-4xl font-black mb-1">$0.00</h2>
+                <p class="special-font text-2xl text-pink-300">Gracias por ser tú.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const frases = ["Siempre me haces reír.","🤍", "Eres mi lugar seguro.", "❤️", "Eres increíble.", "💙", "Te aprecio más.", "💖","Gracias por estar.","🤍", "Mi persona favorita.", "❤️", "Haces todo mejor.", "💙","Qué suerte tengo.", "💖","Mi enana favorita.","🤍", "Eres magica.", "❤️", "Incomparable.", "💖","Te quiero 3000.", "💖"];
+        let mouseX = 0, mouseY = 0;
+        
+        // --- LÓGICA DEL MOTOR DE ESTRELLAS ---
+        const canvas = document.getElementById('stars-canvas');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for(let i=0; i<150; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 1.5,
+                    blink: Math.random() * 0.05
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            stars.forEach(s => {
+                let opacity = 0.2 + Math.abs(Math.sin(Date.now() * s.blink));
+                ctx.globalAlpha = opacity;
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+            });
+            requestAnimationFrame(drawStars);
+        }
+        // -------------------------------------
+
+        gsap.to("#hola", { opacity: 1, duration: 1, y: -10 });
+        gsap.to("#intro-p", { opacity: 1, duration: 1, delay: 1.5 });
+        gsap.to("#btn-start", { opacity: 1, duration: 0.5, delay: 2.5 });
+
+        document.getElementById('btn-start').addEventListener('click', () => {
+            const musica = document.getElementById('musica-fondo');
+            musica.play().catch(error => console.log("Audio block", error));
+
+            gsap.to("#fase1", { opacity: 0, duration: 0.5, display: 'none', onComplete: initFase2 });
+        });
+
+        function initFase2() {
+            // MOSTRAR Y ACTIVAR ESTRELLAS
+            canvas.style.display = 'block';
+            initStars();
+            drawStars();
+
+            document.getElementById('fase2').style.display = 'flex';
+            gsap.to("#tqm-center", { opacity: 1, scale: 1.2, duration: 1 });
+
+            const wrapper = document.getElementById('orbit-wrapper');
+            frases.forEach((t, i) => {
+                let el = document.createElement('div');
+                el.className = 'carousel-item text-sm md:text-lg opacity-80';
+                el.innerText = t;
+                wrapper.appendChild(el);
+
+                let angle = (i / frases.length) * Math.PI * 2;
+                let radius = 120 + (Math.random() * 100);
+                
+                gsap.to(el, {
+                    duration: 10 + Math.random() * 5,
+                    repeat: -1,
+                    ease: "none",
+                    onUpdate: function() {
+                        let time = Date.now() * 0.001;
+                        let x = Math.cos(angle + time + (mouseX * 0.002)) * radius;
+                        let y = Math.sin(angle + time + (mouseY * 0.002)) * radius;
+                        gsap.set(el, { x, y, rotation: angle });
+                    }
+                });
+            });
+
+            setTimeout(() => {
+                const btn = document.getElementById('btn-continue');
+                btn.style.display = 'block';
+                gsap.from(btn, { y: 50, opacity: 0, duration: 1 });
+            }, 4000);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX - window.innerWidth / 2;
+            mouseY = e.clientY - window.innerHeight / 2;
+        });
+
+        document.getElementById('btn-continue').addEventListener('click', () => {
+            gsap.to("#flash", { opacity: 1, duration: 0.3, onComplete: showFase3 });
+        });
+
+        function showFase3() {
+            // OCULTAR ESTRELLAS PARA LA FASE FINAL
+            canvas.style.display = 'none';
+
+            document.getElementById('fase2').style.display = 'none';
+            document.getElementById('fase3').style.display = 'flex';
+            gsap.to("#flash", { opacity: 0, duration: 1.5 });
+            confetti({ particleCount: 150, spread: 70, colors: ['#ff0000', '#ff69b4', '#0000ff', '#ffffff'] });
+            gsap.from("#fase3", { scale: 0.8, opacity: 0, duration: 1.5, ease: "expo.out" });
+        }
+        
+        window.addEventListener('resize', initStars);
+    </script>
+</body>
+</html>
